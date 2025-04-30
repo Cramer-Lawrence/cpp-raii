@@ -7,7 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # 2) Add Executable
-add_executable(cpp-raii src/main.cpp)
+add_executable(cpp-raii
+    src/main.cpp
+    src/file_guard.cpp
+)
+
+
 
 # 3) Includes
 target_include_directories(cpp-raii
