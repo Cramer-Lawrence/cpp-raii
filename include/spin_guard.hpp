@@ -13,7 +13,7 @@ public:
 
 private:
     SpinLock& m_lock;
-    bool m_hasLock {false};
+    bool m_hasLock{false};
 };
 
 #endif
