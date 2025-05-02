@@ -10,6 +10,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(cpp-raii
     src/main.cpp
     src/file_guard.cpp
+    src/mutex_guard.cpp
+    src/spin_lock.cpp
+    src/spin_guard.cpp
 )
 
 
