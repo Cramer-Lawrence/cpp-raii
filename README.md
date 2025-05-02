@@ -29,10 +29,10 @@ std::fprintf(file.get(), "Hello, RAII!\n");
 ---
 
 ### 🔒 `MutexGuard`
-- RAII wrapper around a `std::mutex`
+- RAII wrapper around `std::mutex`
 - Locks on construction, unlocks on destruction
 - Prevents forgetting to unlock a mutex
-- Equivalent to `std::lock_guard` (reimplemented for understanding)
+- Equivalent to `std::lock_guard`
 
 ```cpp
 MutexGuard guard(my_mutex);
@@ -55,44 +55,84 @@ lock.unlock();
 
 ---
 
-### 🧠 `SpinGuard` and `TrySpinGuard`
-
-These are RAII-style wrappers around a shared `SpinLock` implementation:
-
-- `SpinGuard` **blocks** until the lock is acquired
-- `TrySpinGuard` attempts to acquire the lock **without blocking**, allowing conditional logic if the lock isn't immediately available
-
-Both guard types use the same `SpinLock` class, promoting **code reuse**, **clean separation of concerns**, and **modular synchronization logic**. This pattern mirrors the philosophy behind `std::lock_guard` and `std::unique_lock`.
+### 🌀 `SpinGuard`
+- RAII wrapper around `SpinLock`
+- Locks on construction, unlocks on destruction
 
 ```cpp
-SpinGuard guard(lock); // always acquires the lock
+SpinGuard guard(lock);
+// guarantees unlock at scope exit
+```
 
+---
+
+### 💡 `TrySpinGuard`
+- RAII wrapper around `SpinLock` that attempts a non-blocking lock
+- Only enters critical section if the lock was free at construction time
+
+```cpp
 TrySpinGuard tryGuard(lock);
 if (tryGuard.ownsLock()) {
     // safe access
-} else {
-    // fallback logic
 }
 ```
+
 ---
 
-## 🧪 Why This Matters
+### ⏱️ `TimedSpinGuard`
+- RAII wrapper around `SpinLock` that tries to acquire the lock within a timeout window
+- If lock is not acquired before the timeout, it fails gracefully
 
-- Helps avoid common concurrency bugs (like forgetting to unlock or double-closing)
-- Demonstrates best practices for safe resource management
-- Forms the foundation for systems programming, low-latency design, and quant/dev work
+```cpp
+std::chrono::milliseconds timeout{100};
+TimedSpinGuard guard(lock, timeout);
+
+if (guard.hasLock()) {
+    // acquired within timeout
+}
+```
+
+---
+
+## 🧪 Tests
+
+We use **GoogleTest** to validate all RAII and lock behaviors.
+
+### ✅ Tested Components:
+- `SpinLock`: `tryLock()` succeeds and fails appropriately
+- `SpinGuard`: correctly unlocks after scope exit
+- `TrySpinGuard`: acquires only when available
+- `TimedSpinGuard`: times out if lock is busy
+
+### 🏃‍♂️ To Run the Tests:
+
+From your project root:
+
+```bash
+mkdir -p build && cd build
+cmake ..
+make
+ctest --output-on-failure
+```
+
+Or add a convenience script like:
+
+```bash
+#!/bin/bash
+cd build && ctest --output-on-failure
+```
 
 ---
 
 ## 🚧 In Progress
 
-- `ThreadGuard`, `SocketGuard`, `TempFileGuard`, etc.
-- GoogleTest-based unit tests
-- Benchmarks comparing spinlocks vs std::mutex
-  
+- `TryMutexGuard`, `TimedMutexGuard`
+- `ThreadGuard`, `SocketGuard`, `TempFileGuard`
+- Microbenchmarks: SpinLock vs std::mutex
+- Multithreaded contention simulation tests
+
 ---
 
 ## 📜 License
 
 MIT License
-
