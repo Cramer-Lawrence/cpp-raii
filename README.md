@@ -82,3 +82,10 @@ SpinGuard guard(my_spinlock);
 - `ThreadGuard`, `SocketGuard`, `TempFileGuard`, etc.
 - GoogleTest-based unit tests
 - Benchmarks comparing spinlocks vs std::mutex
+  
+---
+
+## 📜 License
+
+MIT License
+
