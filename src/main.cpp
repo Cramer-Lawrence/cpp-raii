@@ -1,16 +1,20 @@
-#include "file_guard.hpp"
+#include "spin_lock.hpp"
+#include "timed_spin_guard.hpp"
 #include <iostream>
 
 
 int main() {
 
-    try {
-        FileGuard fg("example.txt", "w");
-        std::fprintf(fg.get(), "Hello RAII world!\n");
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << "\n";
-    }
+    SpinLock sL{};
+    std::chrono::duration<int, std::ratio<1, 1000>> timeOut {1000};
+    TimedSpinGuard tSG{sL, timeOut};
 
+    if (tSG.hasLock()){
+        std::cout << "Lock Obtained!" << std::endl;
+    } else {
+        std::cout << "No lock..." << std::endl;
+    }
+    
     return 0;
 }
 
