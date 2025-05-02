@@ -55,17 +55,25 @@ lock.unlock();
 
 ---
 
-### 🌀 `SpinGuard`
-- RAII wrapper around `SpinLock`
-- Locks on construction, unlocks on destruction
-- Tracks lock ownership internally to avoid invalid unlocks
-- Behaves like `std::lock_guard` but for your custom `SpinLock`
+### 🧠 `SpinGuard` and `TrySpinGuard`
+
+These are RAII-style wrappers around a shared `SpinLock` implementation:
+
+- `SpinGuard` **blocks** until the lock is acquired
+- `TrySpinGuard` attempts to acquire the lock **without blocking**, allowing conditional logic if the lock isn't immediately available
+
+Both guard types use the same `SpinLock` class, promoting **code reuse**, **clean separation of concerns**, and **modular synchronization logic**. This pattern mirrors the philosophy behind `std::lock_guard` and `std::unique_lock`.
 
 ```cpp
-SpinGuard guard(my_spinlock);
-// safely holds the spinlock during this scope
-```
+SpinGuard guard(lock); // always acquires the lock
 
+TrySpinGuard tryGuard(lock);
+if (tryGuard.ownsLock()) {
+    // safe access
+} else {
+    // fallback logic
+}
+```
 ---
 
 ## 🧪 Why This Matters
@@ -78,7 +86,6 @@ SpinGuard guard(my_spinlock);
 
 ## 🚧 In Progress
 
-- `TrySpinGuard` (non-blocking version of SpinGuard)
 - `ThreadGuard`, `SocketGuard`, `TempFileGuard`, etc.
 - GoogleTest-based unit tests
 - Benchmarks comparing spinlocks vs std::mutex
